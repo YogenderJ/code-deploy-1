@@ -16,10 +16,20 @@ jobs:
                     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                     aws-region: us-west-1
             -   uses: actions/checkout@v2
-            -   id: deploy
-                uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
-            -   uses: peter-evans/commit-comment@v1
-                with:
-                    token: ${{ secrets.TOKEN_GITHUB }}
-                    body: |
-                        @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=eu-central-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
+            
+            -   name: Create new version in Codedeployment
+                run: |
+                    aws deploy create-deployment \
+                        --application-name code-deploy-1 \
+                        --deployment-config-name CodeDeployDefault.OneAtATime \
+                        --deployment-group-name code-deploy-g1 \
+                        --description "My GitHub deployment demo" \
+                        --github-location repository="YogenderJ/code-deploy-1",commitId=${{ github.sha}}
+            
+   #         -   id: deploy
+   #             uses: webfactory/create-aws-codedeploy-deployment@v0.2.2
+   #         -   uses: peter-evans/commit-comment@v1
+   #             with:
+   #                 token: ${{ secrets.TOKEN_GITHUB }}
+   #                 body: |
+   #                     @${{ github.actor }} this was deployed as [${{ steps.deploy.outputs.deploymentId }}](https://console.aws.amazon.com/codesuite/codedeploy/deployments/${{ steps.deploy.outputs.deploymentId }}?region=eu-central-1) to group `${{ steps.deploy.outputs.deploymentGroupName }}`.
