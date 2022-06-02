@@ -1,0 +1,42 @@
+version: 0.0
+os: linux
+files:
+  - source: /index.html
+    destination: /var/www/html/
+hooks:
+  BeforeInstall:
+    - location: scripts/install_dependencies
+      timeout: 300
+      runas: root
+    - location: scripts/start_server
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: scripts/stop_server
+      timeout: 300
+      runas: root
+
+# .appspec.yml
+
+# ... here be your existing CodeDeploy configuration.
+
+# This section controls the action:
+branch_config:
+    wip\/.*: ~
+
+    main:
+        deploymentGroupName: code-deploy-g1
+        deploymentGroupConfig:
+            serviceRoleArn: arn:aws:iam::853875901761:role/ec2-codedeploy-yogi
+            ec2TagFilters:
+                - { Type: KEY_AND_VALUE, Key: Name , Value: New Ubuntu }
+        deploymentConfig:
+            autoRollbackConfiguration:
+                enabled: true
+
+    '.*':
+        deploymentGroupName: $BRANCH.staging.acme.tld
+        deploymentGroupConfig:
+            serviceRoleArn: arn:aws:iam::853875901761:role/ec2-codedeploy-yogi
+            ec2TagFilters:
+                - { Type: KEY_AND_VALUE, Key: hostname, Value: phobos.stage }
